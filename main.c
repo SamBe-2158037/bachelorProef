@@ -53,5 +53,5 @@ int main(){
     float learningRate = 0.25;
 
     double layer[LAYERSIZE];
-
+    return 0;
 }
