@@ -59,5 +59,6 @@ int main(){
     float learningRate = 0.25;
 
     double layer[LAYERSIZE];
+    printf("all done, yeeeey");
     return 0;
 }
