@@ -18,7 +18,7 @@ double sigmoidDerivative(x){
 // bereken de cost functie 
 double cost(double TrainingData[],double outputLayer[]){
     double sum = 0;
-    for(unsigned char i =0;i<sizeof(outputLayer)/sizeof(double);i++){
+    for(unsigned int i =0;i<sizeof(outputLayer)/sizeof(double);i++){
         double eps = TrainingData[i]-outputLayer[i];        
         sum = sum + eps*eps;
 
@@ -27,6 +27,12 @@ double cost(double TrainingData[],double outputLayer[]){
 }
 // bereken a^(l)
 void calcLayer(double weights[],double outgoingNodes[],double bias[],double incomingNodes[]){
+
+    if (numOutgoingNodes != sizeof(outgoingNodes) / sizeof(double) || numIncomingNodes != sizeof(incomingNodes) / sizeof(double)) {
+        printf("Size mismatch error: The provided array sizes do not match the expected sizes.\n");
+        return; // Exit the function
+    }
+    
     for(int j =0;j<sizeof(outgoingNodes)/sizeof(double);j++){
         *(outgoingNodes+j) = 0;
         for(int i = 0;i<sizeof(incomingNodes)/sizeof(double);i++){
@@ -43,9 +49,9 @@ void Learnfunction(){
 
     
 int main(){
-    double trainingsData[TRAININGSIZE][2];
-    double bias[2][TRAININGSIZE];
-    double weights[2][TRAININGSIZE];
+    double trainingsData[TRAININGSIZE][2]; // [Input , Output]
+    double bias[2][TRAININGSIZE]; // voor laag met size m naar laag met size n => 1 x n array
+    double weights[2][TRAININGSIZE]; // voor laag met size m naar laag met size n => m x n array
 
     double lastBias;
     double lastWeight;
