@@ -26,13 +26,7 @@ double cost(double TrainingData[],double outputLayer[]){
     return sum;
 }
 // bereken a^(l)
-void calcLayer(double weights[],double outgoingNodes[],double bias[],double incomingNodes[]){
-
-    if (numOutgoingNodes != sizeof(outgoingNodes) / sizeof(double) || numIncomingNodes != sizeof(incomingNodes) / sizeof(double)) {
-        printf("Size mismatch error: The provided array sizes do not match the expected sizes.\n");
-        return; // Exit the function
-    }
-    
+void calcLayer(double weights[],double outgoingNodes[],double bias[],double incomingNodes[]){    
     for(int j =0;j<sizeof(outgoingNodes)/sizeof(double);j++){
         *(outgoingNodes+j) = 0;
         for(int i = 0;i<sizeof(incomingNodes)/sizeof(double);i++){
