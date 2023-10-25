@@ -67,7 +67,7 @@ int main() {
     double lastBias;
     double lastWeight;
 
-    float learningRate = 0.25;
+    float learningRate = 0.25;//w_k+1 =  w_k + learningRate * gradient vector
 
     printf("all done, yeeeey");
     return 0;
