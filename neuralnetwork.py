@@ -85,7 +85,7 @@ def gradientDescent(trainingsdatacomponent,network):
         for m in range(network[i].outgoingNodes):
             network[i].bias[m] -= LEARNINGRATE*gradientBias[m]
             for n in range(network[i].incomingNodes):
-                network[i].weights[n][m] -= LEARNINGRATE*gradientWeights[m][n] #bij het def van gradientweights heb ik per ongeluk x en y omgewisselt
+                network[i].weights[n][m] -= LEARNINGRATE*gradientWeights[m][n]
   
     return network
 #def random dataset voor sinus
