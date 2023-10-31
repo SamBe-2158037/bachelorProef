@@ -32,8 +32,9 @@ def forwardPropLayer(incomingLayer,outgoingLayer):
     for i in range(outgoingLayer.outgoingNodes):
         outgoingLayer.nodeValues[i] = outgoingLayer.bias[i]
         for j in range(outgoingLayer.incomingNodes):
-            outgoingLayer.nodeValues[i] += incomingLayer.nodeValues[j]*outgoingLayer.weights[j][i]
-        if (outgoingLayer.outgoingNodes != 1): #dit is omdat we niet willen dat de sigmoid functie toegepast wordt op de output layer(tijdelijke fix, er zijn betere oplossingen
+            print(outgoingLayer.weights)
+            outgoingLayer.nodeValues[i] += incomingLayer.nodeValues[j]*outgoingLayer.weights[i][j]
+        if (outgoingLayer.outgoingNodes != 1):#bij de output line mag sigmoid niet toegepast worden, aangzien output als enigste 1 outgoing node heeft is dit een "goede" tijdelijke oplossing
             outgoingLayer.nodeValues[i] = sigmoid(outgoingLayer.nodeValues[i])
     return outgoingLayer
 
@@ -130,6 +131,7 @@ def main():
     print(yvals)
     plt.scatter(xvals,yvals)
     plt.show()
+
 
         
 
