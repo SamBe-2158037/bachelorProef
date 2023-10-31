@@ -2,7 +2,7 @@ import math
 import random
 from matplotlib import pyplot as plt
 PI = 3.14159265358979323846
-LEARNINGRATE = 0.1
+LEARNINGRATE = 0.01
 
 #class van een layer: bevat de weights,biases en nodeswaardes van een rij nodes en de gewichten die binnen komen(de input layer wordt appart gedef aangezien hier niks binnenkomt)
 class layer:
@@ -15,10 +15,6 @@ class layer:
 
 #activatie functie, werkt
 def sigmoid(x):
-    if(x>10):
-        return 1
-    if(x<-10):
-        return 0
     return  1/(1+math.exp(-1*x))
 
 #afgeleide activatiefunctie,werkt
@@ -32,7 +28,6 @@ def forwardPropLayer(incomingLayer,outgoingLayer):
     for i in range(outgoingLayer.outgoingNodes):
         outgoingLayer.nodeValues[i] = outgoingLayer.bias[i]
         for j in range(outgoingLayer.incomingNodes):
-            print(outgoingLayer.weights)
             outgoingLayer.nodeValues[i] += incomingLayer.nodeValues[j]*outgoingLayer.weights[i][j]
         if (outgoingLayer.outgoingNodes != 1):#bij de output line mag sigmoid niet toegepast worden, aangzien output als enigste 1 outgoing node heeft is dit een "goede" tijdelijke oplossing
             outgoingLayer.nodeValues[i] = sigmoid(outgoingLayer.nodeValues[i])
@@ -63,7 +58,7 @@ def cost(network,TrainingDataComponent):
 #1ste versie gradient descent: voor elke laag in het netwerk: bereken gradient numeriek met def afgeleide (f(x+h)-f(x))/h)
 def gradientDescent(trainingsdatacomponent,network):
     originalCost = cost(network,trainingsdatacomponent) 
-    h = 0.1
+    h = 0.001
     for i in range(1,len(network)):
         gradientWeights = []
         gradientBias = []
@@ -77,16 +72,16 @@ def gradientDescent(trainingsdatacomponent,network):
         for k in range(network[i].outgoingNodes):
             gradientWeights.append([])
             for l in range(network[i].incomingNodes):
-                network[i].weights[l][k] +=h
+                network[i].weights[k][l] +=h
                 Cost = cost(network,trainingsdatacomponent)
                 gradientWeights[k].append((Cost-originalCost)/h)
-                network[i].weights[l][k] -=h
-        #voeg 
+                network[i].weights[k][l] -=h
+        print(gradientWeights)
+        print(gradientBias)
         for m in range(network[i].outgoingNodes):
             network[i].bias[m] -= LEARNINGRATE*gradientBias[m]
             for n in range(network[i].incomingNodes):
-                network[i].weights[n][m] -= LEARNINGRATE*gradientWeights[m][n]
-  
+                network[i].weights[m][n] -= LEARNINGRATE*gradientWeights[m][n]
     return network
 #def random dataset voor sinus
 def sinustest(amountdata):
@@ -99,21 +94,21 @@ def sinustest(amountdata):
 #voor elk datapunt, forwardProp hiermee en voer dan gradientdescent uit
 def Learn(network,trainingsdata):
     for i in range(len(trainingsdata)):
-        print(i)
         network[0].nodeValues = [trainingsdata[i][0]]
         network = forwardProp(network)
         network = gradientDescent(trainingsdata[i],network)
 
 def main():
-    size = 10 #de grootte van de laag in het midden
-    trainingsize = 500
+    size = 20 #de grootte van de laag in het midden
+    trainingsize = 1000
     randomStartweights = [[random.random() for i in range(size)] for _ in range(size)]
     randomstartBias = [random.random() for i in range(size)]
     trainingsdata = sinustest(trainingsize)
     input = layer(0,0,0,size,0)
     layer1 = layer(randomStartweights,randomstartBias,1,size,[0.0]*size)
-    layer2 = layer([[0.5],[0.5],[0.5],[0.5],[0.5],[0.5],[0.5],[0.5],[0.5],[0.5]],[0.0],size,1,[0.0])
-    network = [input,layer1,layer2]
+    layer2 = layer(randomStartweights,randomstartBias,1,size,[0.0]*size)
+    layer3 = layer([[0]*size],[0.0],size,1,[0.0])
+    network = [input,layer1,layer2,layer3]
     Learn(network,trainingsdata)
     print("netwerk getraind")
 
