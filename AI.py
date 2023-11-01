@@ -18,7 +18,7 @@ class layer:
 def sigmoid(x):
     return  1/(1+npy.exp(-1*x))
 def sigmoid_vector(arr):
-     sigmoid_func = npy.vectorize(sigmoid)
+    sigmoid_func = npy.vectorize(sigmoid)
     return sigmoid_func(arr)
 
 #afgeleide activatiefunctie,werkt
@@ -43,13 +43,14 @@ def forwardProp(network):#voert forward prop uit op een netwerk(lijst van lagen)
 
 #bereken de MSE van de laatste laag en de verwachte output,werkt
 def MSE(TrainingData,outputLayer): 
-    TrainingsData = TrainingsData[1:2]#last element
-    MSE = npy.linalg.norm(TrainingsData - outputLayer.Values)# L2 norm
+    TrainingData = TrainingData[1:2]#last element
+    MSE = npy.linalg.norm(TrainingData - outputLayer.nodeValues)# L2 norm
     return MSE
 
 
 #bereken de costfunctie: voer forwardpropegation uit met de huidige weights & biases, bereken dan MSE,werkt
 def cost(network,TrainingDataComponent):
+    network[0].nodeValues = npy.array([[TrainingDataComponent[0]]])
     network = forwardProp(network)
     Cost = MSE(TrainingDataComponent,network[-1])
     return Cost
@@ -59,61 +60,60 @@ def gradientDescent(trainingsdatacomponent,network):
     originalCost = cost(network,trainingsdatacomponent) 
     h = 0.001
     for i in range(1,len(network)):
-        gradientWeights = []
-        gradientBias = []
+        gradientWeights = npy.zeros((network[i].outgoingNodes, network[i].incomingNodes))
+        gradientBias = npy.zeros((network[i].outgoingNodes, 1))
         for j in range(network[i].outgoingNodes):
-            network[i].bias[j] += h #(x+h)
+            network[i].bias[j][0] += h #(x+h)
             Cost = cost(network,trainingsdatacomponent)#f(x+h) 
-            gradientBias.append((Cost-originalCost)/h) #voeg def afgeleide toe aan originalCost
-            network[i].bias[j] -=h#trek h er terug vanaf zodat deze geen impact heeft op volgende berekeningen
+            gradientBias[j][0] = ((Cost-originalCost)/h) #voeg def afgeleide toe aan originalCost
+            network[i].bias[j][0] -=h#trek h er terug vanaf zodat deze geen impact heeft op volgende berekeningen
 
         #bewerking is hier analoog aan bias maar dan in 2 dimensies
         for k in range(network[i].outgoingNodes):
-            gradientWeights.append([])
             for l in range(network[i].incomingNodes):
                 network[i].weights[k][l] +=h
                 Cost = cost(network,trainingsdatacomponent)
-                gradientWeights[k].append((Cost-originalCost)/h)
+                gradientWeights[k][l]=(Cost-originalCost)/h
                 network[i].weights[k][l] -=h
         #print(gradientWeights)
         #print(gradientBias)
-        for m in range(network[i].outgoingNodes):
-            network[i].bias[m] -= LEARNINGRATE*gradientBias[m]
-            for n in range(network[i].incomingNodes):
-                network[i].weights[m][n] -= LEARNINGRATE*gradientWeights[m][n]
+        network[i].bias -= LEARNINGRATE * gradientBias
+        network[i].weights -= LEARNINGRATE * gradientWeights
     return network
 
 #voor elk datapunt, forwardProp hiermee en voer dan gradientdescent uit
 def Learn(network,trainingsdata):
-    for i in range(len(trainingsdata)):
-        network[0].nodeValues = [trainingsdata[i][0]]
-        network = forwardProp(network)
-        network = gradientDescent(trainingsdata[i],network)
+    for k in range(1):
+        print("learn routine "+str(k))
+        for i in range(len(trainingsdata)):
+            network[0].nodeValues = npy.array([[trainingsdata[i][0]]])
+            network = forwardProp(network)
+            network = gradientDescent(trainingsdata[i],network)
 
 def main():
     size = 20 #de grootte van de laag in het midden
     trainingsize = 1000
 
     x=npy.random.uniform(-1*PI,PI, trainingsize)
-    trainingsdata = npy.hstack((x,npy.sin(x)))
+    trainingsdata = npy.column_stack((x,npy.sin(x)))
     
     layersize = [1, size, size, size]
     network=[layer(0,0,0,1,[0])]
     for i in range(1,len(layersize)):# aantal layers
-        network.append(layer(npy.random.rand(network[i-1].outgoingNodes, layersize[i]), npy.random.rand(1, layersize[i]), network[i-1].outgoingNodes, layersize[i], npy.zeros((1,layersize[i])))
-
+        randweights = [[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])]
+        randbias = [[random.random()] for _ in range(layersize[i])]
+        network.append(layer(randweights, randbias, network[i-1].outgoingNodes, layersize[i], npy.zeros((1,layersize[i]))))
+    
     Learn(network,trainingsdata)
     print("netwerk getraind")
 
-    xvals = []
+    xvals = npy.random.uniform(-1*PI,PI, trainingsize)
     yvals = []
     #hier gebruiken we het netwerk om functiewaardes te benaderen: y = netwerk(x)
     for i in range(trainingsize):
         #print(i)
-        x = random.uniform(-1*PI,PI)
-        xvals.append(x)
-        network[0].nodeValues = [x]
-        y = forwardProp(network)[-1].nodeValues[0]
+        network[0].nodeValues = npy.array([[xvals[i]]])
+        y = forwardProp(network)[-1].nodeValues[0][0]
         yvals.append(y)
     #print(xvals)
     #print(yvals)
