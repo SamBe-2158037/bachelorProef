@@ -41,30 +41,32 @@ def forwardProp(network):#voert forward prop uit op een netwerk(lijst van lagen)
         network[i] = forwardPropLayer(network[i-1],network[i])
     return network
 
-#bereken de MSE van de laatste laag en de verwachte output,werkt
-def MSE(TrainingData,outputLayer): 
-    TrainingData = TrainingData[1:2]#last element
-    MSE = npy.linalg.norm(TrainingData - outputLayer.nodeValues)# L2 norm
-    return MSE
-
 
 #bereken de costfunctie: voer forwardpropegation uit met de huidige weights & biases, bereken dan MSE,werkt
-def cost(network,TrainingDataComponent):
-    network[0].nodeValues = npy.array([[TrainingDataComponent[0]]])
-    network = forwardProp(network)
-    Cost = MSE(TrainingDataComponent,network[-1])
-    return Cost
+def cost(network,TrainingData):
+    cost = 0
+    for i in range(TrainingData.shape[0]):
+        TrainingDataComponent = TrainingData[i]
+        network[0].nodeValues = npy.array([[TrainingDataComponent[0]]])
+        network = forwardProp(network)
+        cost += (TrainingDataComponent[1]-network[-1].nodeValues[0][0])**2
+    cost = cost/TrainingData.shape[0]
+    return cost
 
 #1ste versie gradient descent: voor elke laag in het netwerk: bereken gradient numeriek met def afgeleide (f(x+h)-f(x))/h)
-def gradientDescent(trainingsdatacomponent,network):
-    originalCost = cost(network,trainingsdatacomponent) 
+def gradientDescent(trainingsdata,network):
+    originalCost = cost(network,trainingsdata) 
     h = 0.001
+
+    
     for i in range(1,len(network)):
         gradientWeights = npy.zeros((network[i].outgoingNodes, network[i].incomingNodes))
         gradientBias = npy.zeros((network[i].outgoingNodes, 1))
+
+        
         for j in range(network[i].outgoingNodes):
             network[i].bias[j][0] += h #(x+h)
-            Cost = cost(network,trainingsdatacomponent)#f(x+h) 
+            Cost = cost(network,trainingsdata)#f(x+h) 
             gradientBias[j][0] = ((Cost-originalCost)/h) #voeg def afgeleide toe aan originalCost
             network[i].bias[j][0] -=h#trek h er terug vanaf zodat deze geen impact heeft op volgende berekeningen
 
@@ -72,9 +74,11 @@ def gradientDescent(trainingsdatacomponent,network):
         for k in range(network[i].outgoingNodes):
             for l in range(network[i].incomingNodes):
                 network[i].weights[k][l] +=h
-                Cost = cost(network,trainingsdatacomponent)
+                Cost = cost(network,trainingsdata)
                 gradientWeights[k][l]=(Cost-originalCost)/h
                 network[i].weights[k][l] -=h
+
+                
         #print(gradientWeights)
         #print(gradientBias)
         network[i].bias -= LEARNINGRATE * gradientBias
@@ -83,25 +87,22 @@ def gradientDescent(trainingsdatacomponent,network):
 
 #voor elk datapunt, forwardProp hiermee en voer dan gradientdescent uit
 def Learn(network,trainingsdata):
-    for k in range(1):
+    for k in range(5):
         print("learn routine "+str(k))
-        for i in range(len(trainingsdata)):
-            network[0].nodeValues = npy.array([[trainingsdata[i][0]]])
-            network = forwardProp(network)
-            network = gradientDescent(trainingsdata[i],network)
+        network = gradientDescent(trainingsdata,network)
 
 def main():
-    size = 20 #de grootte van de laag in het midden
-    trainingsize = 1000
+    size = 10 #de grootte van de laag in het midden
+    trainingsize = 200
 
     x=npy.random.uniform(-1*PI,PI, trainingsize)
     trainingsdata = npy.column_stack((x,npy.sin(x)))
-    
+    print(trainingsdata)
     layersize = [1, size, size, size]
     network=[layer(0,0,0,1,[0])]
     for i in range(1,len(layersize)):# aantal layers
-        randweights = [[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])]
-        randbias = [[random.random()] for _ in range(layersize[i])]
+        randweights = npy.array([[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])])
+        randbias = npy.array([[random.random()] for _ in range(layersize[i])])
         network.append(layer(randweights, randbias, network[i-1].outgoingNodes, layersize[i], npy.zeros((1,layersize[i]))))
     
     Learn(network,trainingsdata)
@@ -113,7 +114,7 @@ def main():
     for i in range(trainingsize):
         #print(i)
         network[0].nodeValues = npy.array([[xvals[i]]])
-        y = forwardProp(network)[-1].nodeValues[0][0]
+        y = round(forwardProp(network)[-1].nodeValues[0][0],5)
         yvals.append(y)
     #print(xvals)
     #print(yvals)
