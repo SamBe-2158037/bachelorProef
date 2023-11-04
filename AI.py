@@ -3,7 +3,7 @@ import random
 from matplotlib import pyplot as plt
 import numpy as npy
 PI = 3.14159265358979323846
-LEARNINGRATE = 0.01
+LEARNINGRATE = 0.1
 
 #class van een layer: bevat de weights,biases en nodeswaardes van een rij nodes en de gewichten die binnen komen(de input layer wordt appart gedef aangezien hier niks binnenkomt)
 class layer:
@@ -79,20 +79,27 @@ def gradientDescent(trainingsdata,network):
                 network[i].weights[k][l] -=h
 
                 
-        #print(gradientWeights)
-        #print(gradientBias)
-        network[i].bias -= LEARNINGRATE * gradientBias
-        network[i].weights -= LEARNINGRATE * gradientWeights
+    #print(gradientWeights)
+    #print("grad BIAS")
+    #print(gradientBias)
+
+    #print("bias before")
+    #print(network[i].bias)
+
+    network[i].bias -= LEARNINGRATE * gradientBias
+    network[i].weights -= LEARNINGRATE * gradientWeights
+    #print("bias after")
+    #print(network[i].bias)
     return network
 
 #voor elk datapunt, forwardProp hiermee en voer dan gradientdescent uit
 def Learn(network,trainingsdata):
-    for k in range(5):
+    for k in range(10):
         print("learn routine "+str(k))
         network = gradientDescent(trainingsdata,network)
 
 def main():
-    size = 10 #de grootte van de laag in het midden
+    size = 5 #de grootte van de laag in het midden
     trainingsize = 200
 
     x=npy.random.uniform(-1*PI,PI, trainingsize)
