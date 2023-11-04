@@ -3,7 +3,7 @@ import random
 from matplotlib import pyplot as plt
 import numpy as npy
 PI = 3.14159265358979323846
-LEARNINGRATE = 0.1
+LEARNINGRATE = 0.5
 
 #class van een layer: bevat de weights,biases en nodeswaardes van een rij nodes en de gewichten die binnen komen(de input layer wordt appart gedef aangezien hier niks binnenkomt)
 class layer:
@@ -55,41 +55,34 @@ def cost(network,TrainingData):
 
 #1ste versie gradient descent: voor elke laag in het netwerk: bereken gradient numeriek met def afgeleide (f(x+h)-f(x))/h)
 def gradientDescent(trainingsdata,network):
-    originalCost = cost(network,trainingsdata) 
-    h = 0.001
+    originalCost = cost(network,trainingsdata)
+    print("OriginalCost: ",end="")
+    print(originalCost)
+    h = 0.1
 
     
     for i in range(1,len(network)):
         gradientWeights = npy.zeros((network[i].outgoingNodes, network[i].incomingNodes))
         gradientBias = npy.zeros((network[i].outgoingNodes, 1))
 
-        
-        for j in range(network[i].outgoingNodes):
-            network[i].bias[j][0] += h #(x+h)
-            Cost = cost(network,trainingsdata)#f(x+h) 
-            gradientBias[j][0] = ((Cost-originalCost)/h) #voeg def afgeleide toe aan originalCost
-            network[i].bias[j][0] -=h#trek h er terug vanaf zodat deze geen impact heeft op volgende berekeningen
-
         #bewerking is hier analoog aan bias maar dan in 2 dimensies
         for k in range(network[i].outgoingNodes):
+            network[i].bias[k][0] += h #(x+h)
+            Cost = cost(network,trainingsdata)#f(x+h) 
+            gradientBias[k][0] = ((Cost-originalCost)/h) #voeg def afgeleide toe aan originalCost
+            network[i].bias[k][0] -=h #trek h er terug vanaf zodat deze geen impact heeft op volgende berekeningen
+
             for l in range(network[i].incomingNodes):
                 network[i].weights[k][l] +=h
                 Cost = cost(network,trainingsdata)
                 gradientWeights[k][l]=(Cost-originalCost)/h
-                network[i].weights[k][l] -=h
-
-                
-    #print(gradientWeights)
-    #print("grad BIAS")
-    #print(gradientBias)
-
-    #print("bias before")
-    #print(network[i].bias)
-
-    network[i].bias -= LEARNINGRATE * gradientBias
-    network[i].weights -= LEARNINGRATE * gradientWeights
-    #print("bias after")
-    #print(network[i].bias)
+                network[i].weights[k][l] -=h     
+        #print(gradientWeights)
+        #print(gradientBias)
+        network[i].bias -= LEARNINGRATE * gradientBias
+        network[i].weights -= LEARNINGRATE * gradientWeights
+    print("after descend: ",end="")
+    print(cost(network,trainingsdata))
     return network
 
 #voor elk datapunt, forwardProp hiermee en voer dan gradientdescent uit
@@ -99,13 +92,13 @@ def Learn(network,trainingsdata):
         network = gradientDescent(trainingsdata,network)
 
 def main():
-    size = 5 #de grootte van de laag in het midden
+    size = 16 #de grootte van de lagen in het midden
     trainingsize = 200
 
     x=npy.random.uniform(-1*PI,PI, trainingsize)
     trainingsdata = npy.column_stack((x,npy.sin(x)))
     print(trainingsdata)
-    layersize = [1, size, size, size]
+    layersize = [1, size, size]
     network=[layer(0,0,0,1,[0])]
     for i in range(1,len(layersize)):# aantal layers
         randweights = npy.array([[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])])
