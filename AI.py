@@ -97,11 +97,11 @@ def main():
     trainingsdata = npy.column_stack((x,npy.sin(x)))
     print(trainingsdata)
     layersize = [1, size, size, size]
-    network=[layer(0,0,0,1,[0])]
+    network=[layer(0,0,0,1,[[0]])]
     for i in range(1,len(layersize)):# aantal layers
         randweights = npy.array([[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])])
         randbias = npy.array([[random.random()] for _ in range(layersize[i])])
-        network.append(layer(randweights, randbias, network[i-1].outgoingNodes, layersize[i], npy.zeros((1,layersize[i]))))
+        network.append(layer(randweights, randbias, network[i-1].outgoingNodes, layersize[i], npy.zeros((layersize[i],1))))
     
     Learn(network,trainingsdata)
     print("netwerk getraind")
