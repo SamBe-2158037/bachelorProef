@@ -80,25 +80,23 @@ def gradientDescent(trainingsdata,network):
         #print(gradientWeights)
         #print(gradientBias)
         network[i].bias -= LEARNINGRATE * gradientBias
-        network[i].weights -= LEARNINGRATE * gradientWeights
-    print("after descend: ",end="")
-    print(cost(network,trainingsdata))
+        network[i].weights -= LEARNINGRATE * gradientWeights    
     return network
 
 #voor elk datapunt, forwardProp hiermee en voer dan gradientdescent uit
 def Learn(network,trainingsdata):
-    for k in range(10):
+    for k in range(750):
         print("learn routine "+str(k))
         network = gradientDescent(trainingsdata,network)
 
 def main():
     size = 16 #de grootte van de lagen in het midden
-    trainingsize = 200
+    trainingsize = 1000
 
     x=npy.random.uniform(-1*PI,PI, trainingsize)
     trainingsdata = npy.column_stack((x,npy.sin(x)))
     print(trainingsdata)
-    layersize = [1, size, size]
+    layersize = [1, size, size, size]
     network=[layer(0,0,0,1,[0])]
     for i in range(1,len(layersize)):# aantal layers
         randweights = npy.array([[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])])
