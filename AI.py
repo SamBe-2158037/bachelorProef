@@ -85,7 +85,7 @@ def gradientDescent(trainingsdata,network):
 
 #voor elk datapunt, forwardProp hiermee en voer dan gradientdescent uit
 def Learn(network,trainingsdata):
-    for k in range(750):
+    for k in range(10):
         print("learn routine "+str(k))
         network = gradientDescent(trainingsdata,network)
 
