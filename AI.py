@@ -96,7 +96,7 @@ def main():
     x=npy.random.uniform(-1*PI,PI, trainingsize)
     trainingsdata = npy.column_stack((x,npy.sin(x)))
     print(trainingsdata)
-    layersize = [1, size, size, size]
+    layersize = [1, size, size, 1]
     network=[layer(0,0,0,1,[[0]])]
     for i in range(1,len(layersize)):# aantal layers
         randweights = npy.array([[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])])
