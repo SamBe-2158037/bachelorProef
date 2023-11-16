@@ -62,11 +62,13 @@ def cost(network,TrainingData):
 
 #1ste versie gradient descent: voor elke laag in het netwerk: bereken gradient numeriek met def afgeleide (f(x+h)-f(x))/h)
 def ADAM(trainingsdata,network,moments,epoch):
+    npy.random.shuffle(trainingsdata)
+    datapoints = trainingsdata[:10]
     b1=0.9
     b2=0.999
     eps=10**(-7)
 
-    originalCost = cost(network,trainingsdata)
+    originalCost = cost(network,datapoints)
     h = 0.1
 
     GRADbias = []
@@ -79,13 +81,13 @@ def ADAM(trainingsdata,network,moments,epoch):
         #bewerking is hier analoog aan bias maar dan in 2 dimensies
         for k in range(network[i].outgoingNodes):
             network[i].bias[k][0] += h #(x+h)
-            Cost = cost(network,trainingsdata)#f(x+h) 
+            Cost = cost(network,datapoints)#f(x+h) 
             gradientBias[k][0] = ((Cost-originalCost)/h) #voeg def afgeleide toe aan originalCost
             network[i].bias[k][0] -=h #trek h er terug vanaf zodat deze geen impact heeft op volgende berekeningen
 
             for l in range(network[i].incomingNodes):
                 network[i].weights[k][l] +=h
-                Cost = cost(network,trainingsdata)
+                Cost = cost(network,datapoints)
                 gradientWeights[k][l]=(Cost-originalCost)/h
                 network[i].weights[k][l] -=h     
         #print(gradientWeights)
@@ -120,20 +122,44 @@ def ADAM(trainingsdata,network,moments,epoch):
 #voor elk datapunt, forwardProp hiermee en voer dan gradientdescent uit
 def Learn(network,trainingsdata):
     moments=[[],[],[],[]]
-    for k in range(50):
+    earlyStop=[0]*20
+
+    x=npy.random.uniform(-1*PI,PI, trainingsdata.shape[0])
+    ValidationData = npy.column_stack((x,npy.sin(x)))
+    X=[]
+    minNet = 1
+    minK_Error =[0, 1]
+    for k in range(2000):
         print("learn routine "+str(k))
         network = ADAM(trainingsdata,network,moments,k)
+
+        X.append(cost(network,ValidationData))
+        if(X[-1]<minK_Error[1]):
+            minK_Error= [k , X[-1]]
+            minNet = network.copy()
+        #earlyStop.append(X[-1])
+        #earlyStop.pop(0)
+        #b = earlyStop.copy()                      #sort past meteen aan!!!
+        #if(all(earlyStop[i] < earlyStop[i + 1] for i in range(len(earlyStop) - 1))):
+        #    print("EARLY STOP ACTIVATED AT EPOCH: "+str(k))
+        #    print(earlyStop)
+        #    break
     print("OriginalCost: ",end="")
     print(cost(network,trainingsdata))
 
-def main():
+    print("Epoch of min Cost: ",end="")
+    print(minK_Error)
+    network = minNet
+    plt.subplot(2,1,1)
+    plt.scatter(list(range(k-99,k+1)),X[-100:])
+def main(): 
     size = 10 #de grootte van de lagen in het midden
-    trainingsize = 250
+    trainingsize = 100
 
     x=npy.random.uniform(-1*PI,PI, trainingsize)
     trainingsdata = npy.column_stack((x,npy.sin(x)))
     print(trainingsdata)
-    layersize = [1, size, size, 1]
+    layersize = [1, size, 1]
     network=[layer(0,0,0,layersize[0],[[0]])]
     for i in range(1,len(layersize)):# aantal layers
         randweights = npy.array([[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])])
@@ -151,9 +177,9 @@ def main():
         network[0].nodeValues = npy.array([[xvals[i]]])
         y = round(forwardProp(network)[-1].nodeValues[0][0],5)
         yvals.append(y)
-    #print(xvals)
-    #print(yvals)
+    plt.subplot(2,1,2)
     plt.scatter(xvals,yvals)
+    plt.scatter(x, npy.sin(x))
     plt.show()
 
 if __name__ =="__main__":
