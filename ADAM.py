@@ -159,12 +159,7 @@ def main():
     x=npy.random.uniform(-1*PI,PI, trainingsize)
     trainingsdata = npy.column_stack((x,npy.sin(x)))
     print(trainingsdata)
-    layersize = [1, size, 1]
-    network=[layer(0,0,0,layersize[0],[[0]])]
-    for i in range(1,len(layersize)):# aantal layers
-        randweights = npy.array([[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])])
-        randbias = npy.array([[random.random()] for _ in range(layersize[i])])
-        network.append(layer(randweights, randbias, network[i-1].outgoingNodes, layersize[i], npy.zeros((layersize[i],1))))
+    network = initialize_network([1, size, 1])
     
     Learn(network,trainingsdata)
     print("netwerk getraind")
@@ -181,6 +176,14 @@ def main():
     plt.scatter(xvals,yvals)
     plt.scatter(x, npy.sin(x))
     plt.show()
-
+    
+def initialize_network(layersize):
+    network=[layer(0,0,0,layersize[0],[[0]])]
+    for i in range(1,len(layersize)):# aantal layers
+        randweights = npy.array([[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])])
+        randbias = npy.array([[random.random()] for _ in range(layersize[i])])
+        network.append(layer(randweights, randbias, network[i-1].outgoingNodes, layersize[i], npy.zeros((layersize[i],1))))
+    return network
+    
 if __name__ =="__main__":
     main()
