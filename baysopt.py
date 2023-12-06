@@ -1,75 +1,79 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from scipy.stats import norm
+
+def BLACK_BOX(x):
+    return np.sin(x/5)+5*np.cos(x/3)
+def BB(x):
+    bb = np.vectorize(BLACK_BOX)
+    return bb(x)
 
 
 def kernel(X,Y):
-    #keuze van kernel is Radial base function 
-    sum = 0
-    if type(X) != 'list' :
-        return np.exp(-(X-Y)**2)
-    for i in range(len(X)):
-        sum = sum+ (X[i]-Y[i])^2
-    return np.exp(-1*sum^2)
-
-def K(x):
-    # stel K op
-    K = [[kernel(x[0],x[0])]]
-    for i in range(1,len(x)):
-        K.append([kernel(x[0],x[i])])
-        print(K)
-        K[0].append(kernel(x[0],x[i]))
-        print(K)
-        for j in range(1,i+1):
-            a = kernel(x[i],x[j])
-            K[i].append(a)
-            print(K)
-            if j!= i:
-                K[j].append(a)
-                print(K)
-
-    return K
-def K_star(X,y):
-    K_star = []
-    for i in range(0,len(X)):
-        K_star.append(kernel(X[i],y))
-    return K_star
-
-def K_starstar(y):
-    return kernel(y,y)
+    return np.exp(-(X-Y)**2)
 
 def predict(X,Xvals,Y):
-    k = K(X)
-    print(k)
-    k = np.linalg.inv(K(X))
+    K = np.vectorize(kernel)
+    k = K(X,np.transpose(X))
+    if(k.shape == (1,1)):
+        kinv = np.array([[1/k[0]]])
+    else:
+        kinv = np.linalg.inv(k)
     datamean = []
     datavar = []
     for i in range(len(Xvals)):
-        kstar = K_star(X,Xvals[i])
-        kstarstar = K_starstar(Xvals[i])
-        meanstar = np.dot(kstar,np.dot(k,Y))
-        cov = kstarstar - np.dot(np.transpose(kstar),np.dot(k,kstar))
+        k_ = K(X,Xvals[i])
+        k__ = K(Xvals[i],Xvals[i])
+        meanstar = np.dot(np.transpose(k_),np.dot(kinv,Y))[0][0]
+        cov = k__ - np.dot(np.transpose(k_),np.dot(kinv,k_))[0][0]
         datamean.append(meanstar)
         datavar.append(cov)
-    return[datamean,cov]
-
-def GP(X,Y,xRange):
-    data = predict(X,xRange,Y)
-    plt.scatter(xRange,data[0])
-    plt.scatter(X,Y)
-    plt.show()
+    return[datamean,datavar]
 
 
 
-    
+def acquisition(X,Xvals,Y,Data, eps):
+    xnew = Xvals[0]
+    PImax = 0
+
+    imax = np.argmax(Y)
+    Xmax = X[imax]
+
+    for i in range(len(Xvals)):
+        mean  = Data[0][i]
+        var = Data[1][i]
+        if(norm.cdf((mean - Y[imax] - eps)/(var+0.001)) > PImax):
+            xnew = Xvals[i]
+            PImax = norm.cdf((mean - Y[imax] - eps)/(var+0.01))
+    print("new point with maximum improvement at: "+str(xnew))
+    return xnew
         
+def search(Xvals):
+    X=np.array([[0], [5], [7]]) #start point in middle?
+    Y=BB(X)
+    for epoch in range(7):
+        Data = predict(X,Xvals,Y)
+
+        plt.clf()
+        plt.scatter(Xvals, BB(Xvals))
+        plt.show()
+        plt.plot(Xvals,Data[0],c="blue",linestyle='-')
+        plt.plot(Xvals,np.array(Data[0])+np.array(Data[1]),c="red",linestyle='-')
+        plt.plot(Xvals,np.array(Data[0])-np.array(Data[1]),c="red",linestyle='-') 
+
+        xnew = acquisition(X,Xvals,Y,Data,5)
+        X = np.append(X,[xnew])
+        X = np.transpose([X])
+        Y=BB(X)
+
+
+
 
 def main():
-    Xvals = [-1,0,1,2,3,4,5,6,7]
-    Yvals = [4.526,5,4.923,4.319,3.266,1.894,0.363,-1.149,-2.468]
     xRange = np.arange(-1,7,0.1)
-    plt.scatter(xRange,np.sin(xRange/5)+5*np.cos(xRange/3))
-    GP(Xvals,Yvals,xRange)
-
+    search(xRange)
+    
 
 if __name__ == "__main__":
     main()
+
