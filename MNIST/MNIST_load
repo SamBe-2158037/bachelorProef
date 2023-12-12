@@ -9,8 +9,8 @@ def main():
     #loading the dataset
     (train_X, train_y), (test_X, test_y) = mnist.load_data()
 
-    trainingsdata = [ [np.transpose([train_X[i].flatten()]), np.transpose([np.insert(np.zeros(9),train_y[i],1)])] for i in range(len(train_X)) ]
-    ValidationData = [[np.transpose([test_X[i].flatten()]), np.transpose([np.insert(np.zeros(9),test_y[i],1)])] for i in range(len(test_X)) ]
+    trainingsdata = [ [np.transpose([train_X[i].flatten()])/255, np.transpose([np.insert(np.zeros(9),train_y[i],1)])] for i in range(len(train_X)) ]
+    ValidationData = [[np.transpose([test_X[i].flatten()])/255, np.transpose([np.insert(np.zeros(9),test_y[i],1)])] for i in range(len(test_X)) ]
     
     print(trainingsdata[0])
     netwerk =  AI_python.initialize_network([28**2, 10, 10, 10])
@@ -18,10 +18,12 @@ def main():
     for i in range(10):
         netwerk[0].nodeValues = np.array(ValidationData[i][0])
         netwerk = AI_python.forwardProp(netwerk)
-        print("---------------------------------")
-        print(netwerk[-1].nodeValues)
+        print("--------- GUESS ------------------------")
+        print(np.argmax(netwerk[-1].nodeValues), end="")
+        print("   from: ",end="")
+        print(np.transpose(netwerk[-1].nodeValues))
         print("-- correct value: ")
-        print(ValidationData[i][1])
+        print(np.argmax(ValidationData[i][1]))
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
