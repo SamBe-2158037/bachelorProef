@@ -51,7 +51,7 @@ def forwardPropLayer(incomingLayer,outgoingLayer,sigmoidBool):
     #print(outgoingLayer.nodeValues)
     outgoingLayer.nodeValues = npy.dot(outgoingLayer.weights, incomingLayer.nodeValues) + outgoingLayer.bias
     if (sigmoidBool):#bij de output line mag sigmoid niet toegepast worden, aangzien output als enigste 1 outgoing node heeft is dit een "goede" tijdelijke oplossing
-            outgoingLayer.nodeValues = CunTanH_vector(outgoingLayer.nodeValues)
+            outgoingLayer.nodeValues = sigmoid_vector(outgoingLayer.nodeValues)
     else:
             outgoingLayer.nodeValues = ReLu_vector(outgoingLayer.nodeValues)
 
@@ -61,7 +61,7 @@ def forwardPropLayer(incomingLayer,outgoingLayer,sigmoidBool):
 def forwardProp(network):#voert forward prop uit op een netwerk(lijst van lagen)
     
     for i in range(1,len(network)):
-        network[i] = forwardPropLayer(network[i-1],network[i],False)
+        network[i] = forwardPropLayer(network[i-1],network[i],True)
     return network
 
 
@@ -80,7 +80,7 @@ def cost(network,TrainingData):
         network = forwardProp(network)
         #print(network[-1].nodeValues)
         #print(TrainingDataComponent[1])
-        cost += npy.sum((TrainingDataComponent[1]-network[-1].nodeValues)**2)
+        cost += npy.sum((TrainingDataComponent[1]-network[-1].nodeValues)**2)#int(TrainingDataComponent[1][0]!=npy.argmax(network[-1].nodeValues))
         SStot += npy.sum((TrainingDataComponent[1] - mean)**2)
     Rsq = 1 - cost/SStot
     cost = cost/len(TrainingData)
@@ -185,31 +185,12 @@ def rLoss(k,C,O, Rsqrd):
         summ+=(Rsqrd[i] - O + C*npy.exp(-k*i))**2
     summ = summ/len(Rsqrd)
     return summ
-def main(): 
-    size = 10 #de grootte van de lagen in het midden
-    
-    trainingsize = 100
-    x=npy.random.uniform(-1*PI,PI, trainingsize)
-    trainingsdata = npy.column_stack((x,npy.sin(x)))
-    x=npy.random.uniform(-1*PI,PI, trainingsdata.shape[0])
-    ValidationData = npy.column_stack((x,npy.sin(x)))
-    print(trainingsdata)
-    
-    network = initialize_network([1, size, 1])
-
-    Learn(network,trainingsdata,ValidationData,1000)
-    print("netwerk getraind")
-
-    #hier gebruiken we het netwerk om functiewaardes te benaderen: y = netwerk(x)
-    plt.show()
-
-
 
 def initialize_network(layersize):
     network=[layer(0,0,0,layersize[0],[[0]*layersize[0]])]
     for i in range(1,len(layersize)):# aantal layers
-        randweights = npy.array([[random.random() for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])])
-        randbias = npy.array([[random.random()] for _ in range(layersize[i])])
+        randweights = npy.array([[random.random()*2-1 for i in range(network[i-1].outgoingNodes)] for _ in range(layersize[i])])
+        randbias = npy.array([[random.random()*2-1] for _ in range(layersize[i])])
         network.append(layer(randweights, randbias, network[i-1].outgoingNodes, layersize[i], npy.zeros((layersize[i],1))))
     return network
 
@@ -224,6 +205,3 @@ def nearest_neighbor_mean(array, windowsize):
             segment = array[i-math.floor(windowsize/2):i+math.floor(windowsize/2)]
         meanList.append(npy.mean(segment))
     return meanList
-
-if __name__ =="__main__":
-    main()
