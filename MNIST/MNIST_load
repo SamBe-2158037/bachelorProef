@@ -9,12 +9,12 @@ def main():
     #loading the dataset
     (train_X, train_y), (test_X, test_y) = mnist.load_data()
 
-    trainingsdata = [ [np.transpose([train_X[i].flatten()])/255, np.transpose([np.insert(np.zeros(9),train_y[i],1)])] for i in range(len(train_X)) ]
+    trainingsdata = [ [np.transpose([train_X[i].flatten()])/255,  np.transpose([np.insert(np.zeros(9),train_y[i],1)])] for i in range(len(train_X)) ]
     ValidationData = [[np.transpose([test_X[i].flatten()])/255, np.transpose([np.insert(np.zeros(9),test_y[i],1)])] for i in range(len(test_X)) ]
     
     print(trainingsdata[0])
     netwerk =  AI_python.initialize_network([28**2, 10, 10, 10])
-    AI_python.Learn(netwerk,trainingsdata[:1000], ValidationData[:1000], 250,10)
+    AI_python.Learn(netwerk,trainingsdata[:1000], ValidationData[:1000], 1,10)
     for i in range(10):
         netwerk[0].nodeValues = np.array(ValidationData[i][0])
         netwerk = AI_python.forwardProp(netwerk)
