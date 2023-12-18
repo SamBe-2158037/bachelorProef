@@ -14,17 +14,25 @@ def main():
     
     print(trainingsdata[0])
     netwerk =  AI_python.initialize_network([28**2, 10, 10, 10])
-    AI_python.Learn(netwerk,trainingsdata[:1000], ValidationData[:1000], 1,10)
-    for i in range(10):
+    AI_python.Learn(netwerk,trainingsdata[:1000], ValidationData[:1000], 1500,10)
+    correct= 0
+    for i in range(len(ValidationData)):
         netwerk[0].nodeValues = np.array(ValidationData[i][0])
         netwerk = AI_python.forwardProp(netwerk)
-        print("--------- GUESS ------------------------")
-        print(np.argmax(netwerk[-1].nodeValues), end="")
-        print("   from: ",end="")
-        print(np.transpose(netwerk[-1].nodeValues))
-        print("-- correct value: ")
-        print(np.argmax(ValidationData[i][1]))
-    print("--- %s seconds ---" % (time.time() - start_time))
+        if(100<=i<150):
+            print("--------- GUESS ------------------------")
+            print(np.argmax(netwerk[-1].nodeValues), end="")
+            print("   from: ",end="")
+            print(np.transpose(netwerk[-1].nodeValues))
+            print("-- correct value: ")
+            print(np.argmax(ValidationData[i][1]))
+        if(np.argmax(ValidationData[i][1]) == np.argmax(netwerk[-1].nodeValues)):
+            correct+=1
+    print("_________________________________________________")
+    print("CORRECT RATIO: %f"% (correct / len(ValidationData)), end="")
+    print("    with correct: "+str(correct)+" out of "+str(len(ValidationData)))
+    print("--- %s seconds ----- end at: "% (time.time() - start_time), end="")
+    print(time.asctime)
 
 
 
