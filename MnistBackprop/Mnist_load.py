@@ -16,7 +16,7 @@ def main():
     print(len(trainingsdata))
     print(len(ValidationData))
     netwerk =  AI_python.initialize_network([28**2, 16,16, 10])
-    AI_python.Learn(netwerk,trainingsdata, ValidationData, 35,100 )
+    AI_python.Learn(netwerk,trainingsdata, ValidationData, 35,10 )
     correct= 0
     for i in range(len(ValidationData)):
         netwerk[0].nodeValues = np.array(ValidationData[i][0])
