@@ -1,15 +1,17 @@
 import numpy as np
 import time
+import matplotlib.pyplot as plt
+plt.rcParams['font.family'] = 'serif'
+
 from sklearn.metrics import r2_score
 import tensorflow as tf
 from keras.datasets import mnist
 from tensorflow.keras import layers, models
-import baysopt as bo
-from functools import partial
-# Load your dataset or generate synthetic data
-# For this example, let's assume you have your dataset loaded into X_train and y_train
+
+from bayes_opt import BayesianOptimization
+from bayes_opt import UtilityFunction
+
 PI = 3.141592
-# Evaluate the model on test data
 
 def build_model(config):
     model = models.Sequential()
@@ -19,28 +21,38 @@ def build_model(config):
     model.add(layers.Dense(1))  # Output layer
     return model
 
-start_time = time.time()
-conf = [1,16,16,1]
-
-
-x=np.random.uniform(-1*PI,PI, 50)
-trainingsdata = np.sin(x)+np.cos(x*5)
-x2=np.random.uniform(-1*PI,PI, 50)
-valii = np.sin(x2)+np.cos(x2*5)
-netwerk =  build_model(conf)
-
-
-def test(L):
-    optimizerr = tf.keras.optimizers.Adam(learning_rate = L)
-    netwerk.compile(optimizer=optimizerr,loss='mean_squared_error')
-    netwerk.fit(x, trainingsdata, batch_size = 16, validation_split=0.5, verbose=0)
+def test(L, netwerk, trainingsdata, valii):
+    optimizer = tf.keras.optimizers.Adam(learning_rate=L)  # Corrected lr parameter
+    netwerk.compile(optimizer=optimizer, loss='mean_squared_error')
+    netwerk.fit(x, trainingsdata, batch_size=16, validation_split=0.5, verbose=0, epochs=10)
     y_pred = netwerk.predict(x)
-    R2 = r2_score(valii,y_pred)
-    print(R2)
+    R2 = r2_score(valii, y_pred)
     return R2
 
-bo.search(np.arange(0.01,0.5,0.01),test) 
+def plot_bo(bo):
+    x = np.linspace(-2, 10, 10000)
+    mean, sigma = bo._gp.predict(x.reshape(-1, 1), return_std=True)
 
+    plt.figure(figsize=(16, 9))
+    plt.plot(x, mean)
+    plt.fill_between(x, mean + sigma, mean - sigma, alpha=0.1)
+    plt.scatter(bo.space.params.flatten(), bo.space.target, c="red", s=50, zorder=10)
+    plt.show()
 
-print("--- %s seconds ----- end at: "% (time.time() - start_time), end="")
+start_time = time.time()
+conf = [1, 16, 16, 1]
+
+x = np.random.uniform(-1 * PI, PI, 50)
+trainingsdata = np.sin(x) + np.cos(x * 5)
+x2 = np.random.uniform(-1 * PI, PI, 50)
+valii = np.sin(x2) + np.cos(x2 * 5)
+netwerk = build_model(conf)
+
+p = {'L': (0.1, 0.5)}
+bo = BayesianOptimization(test, pbounds=p, verbose=7)
+bo.maximize(init_points=5, n_iter=10, acq='ucb', kappa=0.1)
+
+plot_bo(bo)
+
+print("--- %s seconds ----- end at: " % (time.time() - start_time), end="")
 print(time.asctime)
