@@ -6,12 +6,17 @@ In ons hedendaags leven valt het haast niet te ontwijken: Artificiële Intellige
 Deze folder bevat de betanden AI_python en MNIST_load: AI_python is het bestand, gevuld met de gebruikte functies. MNIST_LOAD is het bestand waar de het neuraalnetwerk in getraind wordt. Eerst zal dit programma de mnistdataset inladen. Dit is een dataset die bestaat uit handgetekende cijfers. Hierna zal het netwerk zich trainen op het classificatieprobleem.
 Mnistbackprop doet exact hetzelfde maar dan zal deze werken met behulp van backpropagation in plaats van de naïve implementatie.
 
-##ADAM
+## ADAM
 Dit is een bestand dat de functies bevat om een neuraal netwerk te trainen met behulp van de ADAM optimizer.
 
-##Stochasticdescent
+## Stochasticdescent
 Dit is een bestand dat een neuraal netwerk gaat trainen op een testdataset van sin(x). Dit met behulp van de naive implementatie besproken in de paper.
 
-##tensorflow
+## tensorflow
 Dit is het bestand gebruikt om de experimenten op te stellen die verschillende topologïen uittesten. Deze maakt niet gebruik van het zelfgeprogrameerde netwerk maar van de library tensorflow.
-##
+
+## baysopt
+Dit is het zelfgeschreven programma dat een bayesiaanse optimalisatie gaat uitvoeren op een testfunctie (een lineaire combinatie van sinus en cosinus functies). Hierbij is gekozen voor de acquisitiefunctie expected improvement.
+
+## baysopt-tf
+Dit is een programma dat bayesiaanse optimalisatie zal uitvoeren op een neuraal netwerk met behulp van tensorflow.
